@@ -207,7 +207,15 @@ function render(){
   app.innerHTML=S.tab==="resumen"?viewResumen(flows):S.tab==="movs"?viewMovs(flows):viewTarjetas(flows);
 }
 function authView(view){
-  if(view==="setup") return '<div class="empty"><h2>Falta conectar la base de datos</h2><p>Abrí el archivo <code>config.js</code> y pegá la URL y la clave pública de tu proyecto de Supabase. Los pasos están en LEEME.md.</p></div>';
+  if(view==="setup"){
+    var why={
+      lib:"No se cargó el archivo vendor/supabase.js. Revisá que la carpeta «vendor» esté subida junto con el resto de los archivos.",
+      empty:"El archivo config.js está vacío o todavía tiene los textos de ejemplo. Reemplazá TU_URL_DE_SUPABASE y TU_CLAVE_PUBLISHABLE por los datos de tu proyecto.",
+      url:"La URL de config.js no es válida. Tiene que empezar con https:// y ser la URL de tu proyecto de Supabase, por ejemplo https://abcdefgh.supabase.co.",
+      secret:"La clave de config.js es privada. Usá la clave publishable (empieza con sb_publishable_) y revocá la que pegaste desde el panel de Supabase."
+    }[S.setup]||"Revisá el archivo config.js.";
+    return '<div class="empty"><h2>Falta conectar la base de datos</h2><p>'+why+'</p><p class="hint">Los pasos están en LEEME.md.</p></div>';
+  }
   if(view==="recovery") return '<form id="authform" class="authbox" novalidate><h2>Elegí una contraseña nueva</h2>'
     +'<div class="f"><label for="a-pw">Contraseña nueva</label><input id="a-pw" type="password" autocomplete="new-password" minlength="6"></div>'
     +'<p class="err" id="autherr" role="alert"></p><p class="hint" id="authinfo"></p>'
@@ -587,8 +595,14 @@ if("serviceWorker" in navigator){
   window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
 }
 (function boot(){
-  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_KEY||!window.supabase){S.view="setup";render();return}
-  SB=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  var url=String(CFG.SUPABASE_URL||"").trim(),key=String(CFG.SUPABASE_KEY||"").trim();
+  if(!window.supabase){S.setup="lib";S.view="setup";render();return}
+  if(!url||!key||/^TU_/.test(url)||/^TU_/.test(key)){S.setup="empty";S.view="setup";render();return}
+  if(!/^https?:\/\/[^\s"']+$/.test(url)){S.setup="url";S.view="setup";render();return}
+  if(/^sb_secret_/.test(key)||/service_role/.test(key)){S.setup="secret";S.view="setup";render();return}
+  try{
+    SB=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  }catch(e){S.setup="url";S.view="setup";render();return}
   SB.auth.onAuthStateChange(function(event,session){
     if(event==="TOKEN_REFRESHED"||event==="USER_UPDATED") return;
     setTimeout(function(){onSession(session,event)},0);

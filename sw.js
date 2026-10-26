@@ -4,7 +4,7 @@
    Primero busca en la red (así llegan las actualizaciones) y, si no hay conexión,
    responde con la copia guardada.
    Si cambiás archivos de la app, subí el número de CACHE para renovar las copias. */
-var CACHE = "libreta-v2";
+var CACHE = "libreta-v3";
 var SHELL = [
   "./",
   "index.html",
