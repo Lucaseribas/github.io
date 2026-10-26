@@ -106,7 +106,7 @@ function del(id){
   return Promise.resolve();
 }
 var toastTimer;
-function toast(msg){var t=$("#toast");t.textContent=msg;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.textContent=""},3600)}
+function toast(msg,ms){var t=$("#toast");t.textContent=msg;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.textContent=""},ms||3600)}
 function failMsg(){return "No se pudo guardar. Probá de nuevo."}
 function statusText(){
   var who=S.user&&S.user.email?S.user.email+" · ":"",n=S.pending.length;
@@ -411,8 +411,15 @@ function submitForm(){
     }
   }
   put(d).then(function(){
-    closeSheet();toast("Movimiento guardado");
-    var p=parse(date);S.idx=dueIdx(d.pay==="card"?S.items.filter(function(c){return c.id===d.cardId})[0]:null,date);
+    var card=d.pay==="card"?S.items.filter(function(c){return c.id===d.cardId})[0]:null;
+    var first=dueIdx(card,date),msg="Movimiento guardado";
+    if(card){
+      msg="Guardado en el resumen de "+monthName(first)+" de "+card.name;
+      if(d.cuotas>1) msg+=", con cuotas hasta "+monthName(first+d.cuotas-1);
+      msg+=". Estás viendo ese mes.";
+    }
+    closeSheet();toast(msg,card?7000:3600);
+    S.idx=first;
     render();
   }).catch(function(e){err.textContent=failMsg(e)});
 }
