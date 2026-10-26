@@ -327,10 +327,53 @@ function viewMovs(flows){
   });
   return h+'</ul>';
 }
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function futureCards(flows){
+  var cur=idxOf(now.getFullYear(),now.getMonth()+1);
+  var f=flows.filter(function(x){return x.card&&x.idx>=cur});
+  var h='<section class="cardblock"><p class="eyebrow">Gastos futuros de tarjetas</p>';
+  if(!f.length) return h+'<p class="hint">No tenés resúmenes ni cuotas pendientes desde este mes.</p></section>';
+  var after=sum(f.filter(function(x){return x.idx>cur}));
+  h+='<div class="cardtotal">'+money(after)+'</div><p class="hint">Ya comprometido para los meses posteriores a '+esc(monthName(cur))+'</p>';
+  var by={};
+  f.forEach(function(x){
+    var m=by[x.idx]||(by[x.idx]={total:0,cards:{}});
+    m.total+=x.amount;
+    m.cards[x.card.name]=(m.cards[x.card.name]||0)+x.amount;
+  });
+  var keys=Object.keys(by).map(Number).sort(function(a,b){return a-b});
+  var max=Math.max.apply(null,keys.map(function(k){return by[k].total}));
+  h+='<div style="margin-top:12px">';
+  keys.forEach(function(k){
+    var m=by[k],names=Object.keys(m.cards),detail="";
+    if(names.length>1) detail='<span class="p" style="display:block">'+names.map(function(n){return esc(n)+" "+money(m.cards[n])}).join(" · ")+'</span>';
+    h+='<div class="cat"><span class="n">'+esc(cap(monthName(k)))+(k===cur?' · este mes':'')+detail+'</span><span class="a">'+money(m.total)+'</span>'
+      +'<span class="bar"><b style="width:'+Math.max(2,m.total/max*100).toFixed(1)+'%"></b></span></div>';
+  });
+  h+='</div>';
+  var plans={};
+  f.forEach(function(x){
+    if(x.cuotas<2) return;
+    var p=plans[x.tx.id]||(plans[x.tx.id]={tx:x.tx,card:x.card,left:0,total:0,last:0});
+    p.left++;p.total+=x.amount;p.last=Math.max(p.last,x.idx);
+  });
+  var list=Object.keys(plans).map(function(id){return plans[id]}).sort(function(a,b){return a.last-b.last});
+  if(list.length){
+    h+='<p class="eyebrow" style="margin-top:22px">Compras en cuotas pendientes</p><ul class="rows" style="margin-top:0">';
+    list.forEach(function(p){
+      h+='<li><button type="button" class="row" data-edit="'+esc(p.tx.id)+'"><span class="m">'+esc(p.tx.note||p.tx.category)+'</span>'
+        +'<span class="s">'+esc(p.card.name)+' · faltan '+p.left+(p.left>1?' cuotas':' cuota')+' · termina en '+esc(monthName(p.last))+'</span>'
+        +'<span class="amt">'+money(p.total)+'</span></button></li>';
+    });
+    h+='</ul>';
+  }
+  return h+'</section>';
+}
 function viewTarjetas(flows){
   var cards=S.items.filter(function(c){return c.kind==="card"});
   var h='<div class="actions" style="margin-bottom:20px"><button type="button" class="btn" data-act="addcard">Agregar tarjeta</button></div>';
   if(!cards.length) return h+'<div class="empty"><p>Todavía no cargaste ninguna tarjeta. Con el día de cierre y de vencimiento, cada compra en cuotas se reparte en los resúmenes que le corresponden.</p></div>';
+  h+=futureCards(flows);
   cards.forEach(function(c){
     var mine=flows.filter(function(f){return f.card&&f.card.id===c.id});
     var cur=mine.filter(function(f){return f.idx===S.idx}).sort(function(a,b){return a.tx.date<b.tx.date?1:-1});
