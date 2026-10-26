@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "Libreta de gastos",
+  "short_name": "Libreta",
+  "description": "Ingresos, gastos y tarjetas con cuotas, sincronizados entre tus dispositivos.",
+  "lang": "es-AR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f1f4f2",
+  "theme_color": "#14201c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

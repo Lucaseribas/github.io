@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Libreta de gastos</title>
+<meta name="description" content="Ingresos, gastos y tarjetas con cuotas, sincronizados entre tus dispositivos.">
+<meta name="theme-color" content="#f1f4f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1513" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Libreta">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Libreta de gastos</h1>
+      <p class="sync"><span id="sync"></span><span id="acct"> · <button type="button" class="link" data-act="logout">Cerrar sesión</button></span></p>
+    </div>
+    <div class="monthnav">
+      <button type="button" data-act="prev" aria-label="Mes anterior">‹</button>
+      <span id="monthLabel" aria-live="polite"></span>
+      <button type="button" data-act="next" aria-label="Mes siguiente">›</button>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button type="button" role="tab" data-tab="movs" aria-selected="false">Movimientos</button>
+    <button type="button" role="tab" data-tab="tarjetas" aria-selected="false">Tarjetas</button>
+  </nav>
+  <main id="app"></main>
+</div>
+<button type="button" class="btn fab" data-act="add">+ Agregar</button>
+<div id="sheet" class="overlay" hidden></div>
+<div id="toast" role="status"></div>
+<noscript><p style="padding:16px">Esta aplicación necesita JavaScript.</p></noscript>
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
