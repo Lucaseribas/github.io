@@ -113,7 +113,7 @@ function statusText(){
   if(S.status==="auth") return "Tu sesión venció. Volvé a ingresar.";
   if(!navigator.onLine||S.status==="offline") return who+"Sin conexión"+(n?" · "+n+" cambio"+(n>1?"s":"")+" por enviar":" · los cambios se enviarán al volver");
   if(S.status==="syncing") return who+"Sincronizando…";
-  if(S.status==="error") return who+"No se pudo sincronizar"+(n?" · "+n+" por enviar":"")+". Se reintenta solo.";
+  if(S.status==="error") return who+"No se pudo sincronizar"+(n?" · "+n+" por enviar":"")+(S.err?" ("+S.err+")":"")+". Se reintenta solo.";
   return who+(n?"Guardado en este dispositivo, enviando…":"Sincronizado");
 }
 function paintStatus(){var el=$("#sync");if(el&&S.view==="app") el.textContent=statusText()}
@@ -169,6 +169,8 @@ function sync(){
   syncing=true;S.status="syncing";paintStatus();
   return push().then(pull).then(function(){S.status="ok"}).catch(function(e){
     S.status=isAuthErr(e)?"auth":"error";
+    S.err=e&&(e.message||e.code)?String(e.message||e.code).slice(0,140):"error desconocido";
+    try{console.warn("Libreta: fallo de sincronización",e)}catch(x){}
   }).then(function(){
     syncing=false;rebuild();
     if(S.view==="app") render();
