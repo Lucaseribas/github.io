@@ -4,7 +4,7 @@
    Primero busca en la red (así llegan las actualizaciones) y, si no hay conexión,
    responde con la copia guardada.
    Si cambiás archivos de la app, subí el número de CACHE para renovar las copias. */
-var CACHE = "libreta-v3";
+var CACHE = "libreta-v4";
 var SHELL = [
   "./",
   "index.html",
@@ -41,7 +41,7 @@ self.addEventListener("fetch", function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req).then(function (res) {
+    fetch(req, { cache: "no-cache" }).then(function (res) {
       if (res && res.ok) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
